@@ -1,0 +1,66 @@
+.visual_sort{
+	height: 300px;
+	margin-top: 10px;
+}
+.visual_sort .value_sort{
+	display: inline-block;
+	width: 50px;
+	width: auto;
+	border: 1px solid black;
+	padding: 5px 10px 5px 10px;
+}
+.visual_sort .colls{
+	position: relative;
+	margin-top: 5px;
+}
+.visual_sort .culumn{
+	position: absolute;
+	display: inline-block;
+	color: white;
+	width: 20px;
+	border: 1px solid black;
+	background: blue;
+	text-align: center;
+	transition: left 0.5s;
+	border-radius: 0px 0px 3px 3px;
+}
+.visual_sort .moveMode{
+	background: red;
+}
+.panelSortControl{
+	position: fixed;
+	right: 0px;
+	top: 0px;
+	background: green;
+	width: 300px;
+	height: auto;
+	padding: 10px;
+}
+.panelSortControl .module_report{
+	margin: 10px;
+}
+
+.panelSortControl .module_report label{
+	font-weight: bold;
+	margin-right: 10px;
+	color: white;
+}
+.panelSortControl .module_report .sortStep, .allSortStep{
+	display: inline-block;
+	background: white;
+	width: 50px;
+	padding: 5px;
+	text-align: center;
+}
+.status{
+	width: 200px;
+	height: 100px;
+	background: grey;
+	text-align: center;
+	padding-top: 20px;
+	color: white;
+	border-radius: 10px;
+}
+.status_none{
+	display: none;
+}
