@@ -13,29 +13,39 @@ let link = (function(){
       if(!topics[topic] || !topics[topic].length) return;
 
       if( info.change ){
-        if( info.change.type == "add"){
-          sorters.set(info.change.sortObject, 0);
+        if( info.change == "add"){
+          sorters.set(info.sortObject, {
+            count: 0,
+            status: info.status
+          });
         }
-        else if ( info.change.type == "remove" ){
-          count -= sorters.get(info.change.sortObject);
-          sorters.delete(info.change.sortObject);
+        else if ( info.change == "remove" ){
+          let sorterData = sorters.get(info.sortObject);
+          count = count - sorterData.count;
+          sorters.delete(info.sortObject);
         }
 
-      } else if( info.sort ) {
-        if( info.sort.derection ){
-          let value = sorters.get(info.sort.sortObject);
-          sorters.set(info.sort.sortObject, ++value);
+      } else if( info.hasOwnProperty('derection') ) {
+        if( info.derection ){
+          let sorterData = sorters.get(info.sortObject);
+          sorterData.count = sorterData.count + 1;
+          sorters.set(info.sortObject, sorterData);
           count++;
         } else {
-          let value = sorters.get(info.sort.sortObject);
-          sorters.set(info.sort.sortObject, --value);
+          let sorterData = sorters.get(info.sortObject);
+          sorterData.count = sorterData.count - 1;
+          sorters.set(info.sortObject, sorterData);
           count--;
         }
+      } else if( info.status ){
+        let value = sorters.get(info.sortObject);
+        value.status = info.status;
+        sorters.set(info.sortObject, value);
       }
 
       let listeners = topics[topic]; 
       
-      info.count = {
+      info.dataSorters = {
         counters: sorters,
         sumCount: count
       };

@@ -4,43 +4,102 @@ import Columns from './Columns.js';
 import lib from './lib.js';
 
 class Sorter{
-	constructor({ numbers, containerSorters, callback }){
+	constructor({ containerSorters, getPromiseData, callback }){
     this.callSortManager = callback;
-    this.numbers = numbers;
+    this.getPromiseData = getPromiseData;
     this.containerSorters = containerSorters;
-
-    let massNumbers = this.numbers.split("").map( nextNumber => parseInt(nextNumber) );
-    
-		this.columns = new Columns( massNumbers );
-    this.sortFunction = new DelayBoubleSort( massNumbers );
-    
     this.steps = [];
 
-		this.render();
+    this.renderModule();
+    
 	}
 
-	render(){
-    let moduleSort = this.createModule();
-    this.module = this.containerSorters.appendChild( moduleSort );
+	renderModule(){
+    this.module = this.createModule();
+    this.containerSorters.append( this.module );
+    this.getData();
+	}
+  
+  renderSorter(numbers){
+    this.numbers = numbers;
+    let massNumbers = this.numbers.split("").map( nextNumber => parseInt(nextNumber) );
+    this.columns = new Columns( massNumbers );
+    this.sortFunction = new DelayBoubleSort( massNumbers );
 
-		let columnsData = this.columns.getElem();
-		
+    let columnsData = this.columns.getElem();
+    
     if( !this.massColumns ){
       this.massColumns = columnsData;
     }
+    let moduleSorter = this.createSorter();
 
-    moduleSort.lastElementChild.append( ...columnsData );
+    moduleSorter.lastElementChild.append( ...columnsData );
 
-    let btnNext = moduleSort.querySelector('.next_sort');
-    let btnPrevious = moduleSort.querySelector('.previous_sort');
-    let btnRemoveSorter = moduleSort.querySelector('.remove_sorter');
+    let btnNext = moduleSorter.querySelector('.next_sort');
+    let btnPrevious = moduleSorter.querySelector('.previous_sort');
+    let btnRemoveSorter = moduleSorter.querySelector('.remove_sorter');
 
     btnNext.onclick = this.nextSortStep.bind(this);
     btnPrevious.onclick = this.previousSortStep.bind(this);
     btnRemoveSorter.onclick = this.onRemove.bind(this);
     
-	}
+    this.callSortManager({ 
+      sortObject: this,
+      status: "success"
+    });
+    
+    this.module.append( moduleSorter );
+    this.module.removeChild( this.module.firstElementChild );
+  }
+  getData(){
+    let resultRequest = this.getPromiseData();
+
+    resultRequest.then((data) => {
+        if(data.result){
+          this.renderSorter( data.result.slice(0, 5).join("") );
+        } else {
+          let agreeModule = this.module.querySelector(".reconnect_question")
+          agreeModule.classList.remove("question_hidden");
+
+          let btnYes = agreeModule.children[1];
+          let btnNo = agreeModule.children[2];
+          btnYes.onclick = () => {
+            agreeModule.classList.add("question_hidden");
+            this.getData();
+
+            this.callSortManager({ 
+            sortObject: this,
+            status: "pending"
+          });
+          }
+          btnNo.onclick = () => { 
+            this.onRemove();
+          }
+          this.callSortManager({ 
+            sortObject: this,
+            status: "error"
+          });
+        }
+    });
+  }
+
   createModule(){
+    var tmpl = _.template(`
+      <div class="sort_module"> 
+        <div class="status">Загружаю данные.....
+          <div class="reconnect_question question_hidden">
+            <span>Не удалось загрузить данные. <br> Хотите повторить попытку?</span>
+            <input type="button" value="да">
+            <input type="button" value="нет">
+          </div>
+        </div>
+      </div>
+      `);
+    let html = tmpl();
+
+    return lib.createElementFromHtml(html);
+  }
+  createSorter(){
     var tmpl = _.template(`
       <div class="visual_sort">
         <span class="value_sort"> <%= numbers %> </span>
@@ -49,54 +108,46 @@ class Sorter{
         <input class="remove_sorter" type="button" value="Удалить">
         <div class="colls"></div>
       </div>
-    `);
+      `);
     let html = tmpl({ 
       numbers: this.numbers
     });
-
     return lib.createElementFromHtml(html);
   }
+  //////////////////////////////////////////////////////////////
   nextSortStep(){
     let nextPosition = this.sortFunction.nextStepSort();
     if ( nextPosition ){
-      // nextPosition уже получает объект {from to}
       this.steps.push(nextPosition);
       this.moveColumns(nextPosition);
       this.callSortManager({ 
-        sort: {
-          sortObject: this, 
-          derection: true
-        },
-        change: null
+        sortObject: this, 
+        derection: true
       });
     }
   }
 
   previousSortStep(){
-    
     if( !this.steps.length ) return; 
     
     let replace = this.steps[this.steps.length - 1];
     this.sortFunction.backStepSort(replace);
     this.moveColumns(replace);
     this.steps.length -= 1;
+
     this.callSortManager({ 
-      sort: {
-        sortObject: this, 
-        derection: false
-      },
-      change: null
+      sortObject: this, 
+      derection: false
     });
   }
+
   onRemove(){
     this.callSortManager({ 
-        sort: null,
-        change: {
-          type: "remove",
-          sortObject: this
-        }
-      });
+      sortObject: this,
+      change: "remove"
+    });
   }
+
   remove(){
     if(this.module){
       this.module.parentElement.removeChild(this.module);
@@ -104,6 +155,7 @@ class Sorter{
       this.sortFunction = null;
     }
   }
+
   moveColumns(dataReplace){
     const WIDTH = 20;
     const GAP = 3;
@@ -120,5 +172,6 @@ class Sorter{
       [dataReplace.from]: ( positionFrom * (WIDTH + GAP) ) - (WIDTH + GAP)
     });
   }
+
 }
 export default Sorter;

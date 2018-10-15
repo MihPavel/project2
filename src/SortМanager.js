@@ -8,7 +8,18 @@ class SortМanager{
 		this.containerSorters = containerSorters;
 	}
 	addSorter(){
-		this.requestData( this.createSorter.bind(this) );
+		//let promiseData = this.requestData();
+		let sorter = new Sorter({ 
+			containerSorters: this.containerSorters, 
+			getPromiseData: this.getDate.bind(this),
+			callback: this.onChange.bind(this)
+		});
+
+		this.onChange({
+				sortObject: sorter,
+        change: "add",
+        status: "pending"
+      });
 	}
 	onChange(options){
 		options.sender = "manager";
@@ -16,30 +27,19 @@ class SortМanager{
 		
 		if(!options.change) return; 
 
-		if( options.change.type == "remove" ){
-			options.change.sortObject.remove();
+		if( options.change == "remove" ){
+			options.sortObject.remove();
 		}
-	}
-	createSorter(numbers){
-		
-		let sorter = new Sorter({ 
-			containerSorters: this.containerSorters, 
-			numbers: numbers,
-			callback: this.onChange.bind(this)
-		});
-
-		this.onChange({ 
-        sort: null,
-        change: {
-        	sortObject: sorter,
-          type: "add"
-        },
-        sender: "manager"
-      });
-
 	}
 	notify(options){
 		if(options.sender == "manager") return;
+
+		if( options.change == "remove" ){
+			options.sortObject.remove();
+		}
+	}
+	getDate(){
+		return this.requestData();
 	}
 }
 
