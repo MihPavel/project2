@@ -1,5 +1,5 @@
-import lib from './lib.js';
-import link from './Link.js';
+// @flow
+import link from './Link';
 
 class PanelSortControl{
 	constructor({ panel, allSteps }){
@@ -7,13 +7,14 @@ class PanelSortControl{
 		this.panel = panel;
 	}
 	
-	notify(options){
-		if(options.sender == "panel") return;
-
-		this.updateInterface(options.dataSorters);
-		this.allSteps.textContent = options.dataSorters.sumCount;
+	getNotify(){
+		return function(options){
+			if(options.sender == "panel") return;
+			this.updateInterface(options.dataSorters);
+			this.allSteps.textContent = options.dataSorters.sumCount;
+		}.bind(this)
 	}
-	onChenge(options){
+	onChange(options){
 		link.publish('sort', options);
 	}
 	updateInterface(dataSorters){
@@ -33,7 +34,7 @@ class PanelSortControl{
 			let count = elem[1].count;
 			let status = elem[1].status
 
-			let countModule = document.createElement("div");
+			this.countModule = document.createElement("div");
 			let columnCount = document.createElement("div");
 			columnCount.classList.add("column_count");
 
@@ -53,17 +54,22 @@ class PanelSortControl{
 			btnRemoveCount.onclick = this.createHandler(sorter);
 			btnRemoveCount.classList.add("panel_btn_remove");
 
-			countModule.append(columnCount, btnRemoveCount);
-			this.container.append(countModule);
+			this.countModule.append(columnCount, btnRemoveCount);
+			this.container.append(this.countModule);
+		}
+	}
+	getModuleSorters(){
+		if( this.countModule ){
+			return this.countModule;
 		}
 	}
 	createHandler(sorter){
 		return function(){
-			this.onChenge({
+			this.onChange({
 				sortObject: sorter,
         change: "remove"
       });
-		}.bind(this);
+		}.bind(this)
 	}
 }
 

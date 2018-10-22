@@ -1,27 +1,28 @@
-import Sorter from './Sorter.js';
-import link from './Link.js';
+// @flow
+import Sorter from './Sorter';
+import link from './Link';
 
-class SortМanager{
-	constructor({ btnAddSorter, containerSorters, requestData }){
-		this.requestData = requestData;
-		btnAddSorter.onclick = this.addSorter.bind(this);
-		this.containerSorters = containerSorters;
-	}
-	addSorter(){
-		//let promiseData = this.requestData();
-		let sorter = new Sorter({ 
-			containerSorters: this.containerSorters, 
-			getPromiseData: this.getDate.bind(this),
-			callback: this.onChange.bind(this)
-		});
+class SortМanager {
+  constructor({ btnAddSorter, containerSorters, requestData }) {
+    this.requestData = requestData;
+    btnAddSorter.onclick = this.addSorter.bind(this);
+    this.containerSorters = containerSorters;
+  }
 
-		this.onChange({
-				sortObject: sorter,
-        change: "add",
-        status: "pending"
-      });
-	}
-	onChange(options){
+  addSorter() {
+    const sorter = new Sorter({
+      containerSorters: this.containerSorters,
+      getPromiseData: this.getDate.bind(this),
+      callback: this.onChange.bind(this),
+    });
+    this.onChange({
+      sortObject: sorter,
+      change: "add",
+      status: "pending"
+    });
+  }
+
+	onChange(options) {
 		options.sender = "manager";
 		link.publish('sort', options);
 		
@@ -31,14 +32,18 @@ class SortМanager{
 			options.sortObject.remove();
 		}
 	}
-	notify(options){
-		if(options.sender == "manager") return;
 
-		if( options.change == "remove" ){
-			options.sortObject.remove();
-		}
+	getNotify() {
+		return function(options){
+			if(options.sender == "manager") return;
+
+			if( options.change == "remove" ){
+				options.sortObject.remove();
+			}
+		}.bind(this)
 	}
-	getDate(){
+
+	getDate() {
 		return this.requestData();
 	}
 }

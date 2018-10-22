@@ -1,3 +1,4 @@
+// @flow
 class Columns{
 	constructor( numbers ){
 		this.massNumbers = numbers;
@@ -6,7 +7,9 @@ class Columns{
 		if(!this.elem){
 			this.render();
 		}
+		console.log( this.elem );
 		return this.elem;
+
 	}
 	render(){
 		let colls = [];
@@ -23,6 +26,7 @@ class Columns{
 			column.dataset.position = i;
 			column.style.left = (WIDTH + GAP) * (i - 1) + 'px';
 			colls.push(column);
+
 		}
 
 		this.elem = colls;

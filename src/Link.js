@@ -1,3 +1,4 @@
+// @flow
 let link = (function(){
   let topics = {};
   let sorters = new Map();
@@ -51,7 +52,7 @@ let link = (function(){
       };
 
       listeners.forEach(function(item) {
-          item.notify(info);
+          item(info);
       });
     }
   };

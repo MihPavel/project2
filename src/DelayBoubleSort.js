@@ -1,6 +1,7 @@
-
+// @flow
 class DelayBoubleSort{
   constructor( numbers ){
+    //выбрасывать исключение
     this.massNumbers = numbers;
     this.currentPosition = 0;
   }
@@ -23,7 +24,11 @@ class DelayBoubleSort{
     }
   }
 
+  getStateSort(){
+    if ( !this.massNumbers ) return;
 
+    return this.massNumbers.slice();
+  }
   backStepSort(position){
     [ this.massNumbers[position.from], this.massNumbers[position.to] ] = [ this.massNumbers[position.to], this.massNumbers[position.from] ];
     this.currentPosition = position.from;
